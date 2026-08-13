@@ -1,39 +1,31 @@
-from sys import argv
-
-
 class FlyInSettings:
     def __init__(self) -> None:
-        if len(argv) != 2:
-            raise InputError("Takes ony the map config file as an argument")
-        self.read_and_format()
-
-    def read_and_format(self) -> None:
-        with open(argv, "r") as map_config_file:
-            for line in map_config_file:
-                if line.startswith("#"):
-                    self.map_description: str = line.split("# ", 1)[1]
-                elif line.startswith("nb_drones"):
-                    self.nbr_drones: int = int(line.split(": ", 1)[1])
-                elif line.startswith("start_hub"):
-                    start_line: str = line.split(": ")[1]
-                    start_info: list[str] = start_line.split(" ")
-                    self.start_x: int = int(start_info[1])
-                    self.start_y: int = int(start_info[2])
-                    self.start_metadata: str = start_info[3]
-                elif line.startswith("end_hub"):
-                    end_line: str = line.split(": ")[1]
-                    end_info: list[str] = end_line.split(" ")
-                    self.end_x: int = int(end_info[1])
-                    self.end_y: int = int(end_info[2])
-                    self.end_metadata: str = end_info[3]
-                elif line.startswith("hub"):
+        self.description: str
+        self.nbr_drones: int
+        self.hubs_list: list[Hub]
+        self.connections_list[Connection]
 
 
 class Hub:
     def __init__(self, line: str) -> None:
-        self.name
+        self.name: str
+        self.x: int
+        self.y: int
+        self.meta_data: self.MetaData
+
+    class MetaData:
+        def __init__(self) -> None:
+            self.zone: str = "normal"
+            self.colour: str = "None"
+            self.max_drones: int = 1
 
 
-class InputError:
+class Connection:
+    def __init_(self, line: str) -> None:
+        self.connection_a: Hub
+        self.connection_b: Hub
+
+
+class InputError(Exception):
     def __init__(self, msg: str) -> None:
         super().__init__(f"Input Error: {msg}")
