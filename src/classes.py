@@ -1,31 +1,36 @@
 class FlyInSettings:
     def __init__(self) -> None:
-        self.description: str
-        self.nbr_drones: int
-        self.hubs_list: list[Hub]
-        self.connections_list[Connection]
+        self.nbr_drones: int = 0
+        self.hubs_list: list[Hub] = []
+        self.start_hub: Hub = Hub()
+        self.end_hub: Hub = Hub()
+        self.connections_list: list[Connection] = []
 
 
 class Hub:
-    def __init__(self, line: str) -> None:
-        self.name: str
-        self.x: int
-        self.y: int
-        self.meta_data: self.MetaData
+    def __init__(self) -> None:
+        self.name: str = ""
+        self.x: int = 0
+        self.y: int = 0
+        self.meta_data: self.MetaData = self.MetaData()
 
     class MetaData:
         def __init__(self) -> None:
             self.zone: str = "normal"
             self.colour: str = "None"
-            self.max_drones: int = 1
+            self.max_drones: int = 0
 
 
 class Connection:
-    def __init_(self, line: str) -> None:
-        self.connection_a: Hub
-        self.connection_b: Hub
+    def __init__(self) -> None:
+        self.connections: list[Hub] = []
 
 
 class InputError(Exception):
     def __init__(self, msg: str) -> None:
         super().__init__(f"Input Error: {msg}")
+
+
+class ParsingError(Exception):
+    def __init__(self, msg: str) -> None:
+        super().__init__(f"Parsing Error: {msg}")
