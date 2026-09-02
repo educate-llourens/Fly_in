@@ -23,7 +23,8 @@ class Hub:
 
 class Connection:
     def __init__(self) -> None:
-        self.connections: list[Hub] = []
+        self.hubs_list: list[Hub] = []
+        self.max_link_capacity: int = 1
 
 
 class InputError(Exception):
