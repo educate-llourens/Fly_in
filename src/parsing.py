@@ -10,6 +10,7 @@ def parsing() -> FlyInSettings:
                          "an argument")
     with open(argv[1], "r") as config_file:
         for line in config_file:
+            line = line.strip()
             if line.startswith("nb_drones"):
                 settings.nbr_drones = int(line.split(":", 1)[1])
             elif line.startswith("start_hub"):
@@ -58,24 +59,18 @@ def extract_hub_info(line: str) -> Hub:
 def extract_connection(line: str, hubs_list: list[Hub]) -> Connection:
     connections: str = line.split(": ", 1)[1]
     get_connections_list: list[str] = connections.split(" ")
+    connections_list: list[str] = (
+        get_connections_list[0].split("-"))
+    connection: Connection = Connection()
+    for i in range(len(connections_list)):
+        hub = find_hub(hubs_list, connections_list[i])
+        connection.hubs_list.append(hub)
     if len(get_connections_list) > 1:
-        connections_list: list[str] = (
-            get_connections_list[0].split("-"))
-        connection: Connection = Connection()
         connections_metadata: str = get_connections_list[1]
-        for i in range(len(connections_list)):
-            hub = find_hub(hubs_list, connections_list[i])
-            connection.hubs_list.append(hub)
         connection.max_link_capacity = int(
-            connections_metadata.split("max_link_capacity=")[1].replace("]", ""))
-        return connection
-    elif len(get_connections_list) == 1:
-        # print(get_connections_list)
-        connections_list: list[str] = (
-            get_connections_list[0].split("-"))
-        print(connections_list)
-    else:
-        print("get connections len is weird")
+            connections_metadata.split(
+                "max_link_capacity=")[1].replace("]", ""))
+    return connection
 
 
 def find_hub(hubs_list: list[Hub], hub_name: str) -> Hub:
