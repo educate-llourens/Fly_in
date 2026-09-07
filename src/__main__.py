@@ -1,6 +1,6 @@
 from colorama import Fore
-from classes import FlyInSettings, InputError, ParsingError
-from parsing import parsing
+from src.classes import FlyInSettings, InputError, ParsingError
+from src.parsing import parsing
 
 
 def fly_in() -> None:

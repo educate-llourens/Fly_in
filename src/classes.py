@@ -1,3 +1,13 @@
+# Classes list ----------------------------------------------------------------
+# 1. FlyInSettings
+# 2. Hub
+#    a. Metadata
+# 3. Connection
+# 4. InputError
+# 5. ParsingError
+# -----------------------------------------------------------------------------
+
+
 class FlyInSettings:
     def __init__(self) -> None:
         self.nbr_drones: int = 0

@@ -1,9 +1,10 @@
-MAIN= fly_in.py
+MAIN= src/__main__.py
 VENV_DIR= .venv
 BIN_DIR= $(VENV_DIR)/bin
 PYTHON= $(BIN_DIR)/python3
 PIP= $(BIN_DIR)/pip
 ACTIVATE=$(BIN_DIR)activate
+MAP ?= maps/01_linear_path.txt
 MYPY_FLAGS= --warn-return-any \
 			--warn-unused-ignore \
 			--ignore-missing-imports \
@@ -16,10 +17,10 @@ install:
 	uv venv
 	uv sync
 run:
-	uv run python3 -m src
+	uv run python3 -m src $(MAP)
 
 debug:
-# 	To do: Add debugger
+	$(PYTHON) -m pdb $(MAIN) $(MAP)
 
 test:
 	pytest
