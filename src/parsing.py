@@ -25,7 +25,7 @@ def parsing() -> FlyInSettings:
         default="maps/01_linear_path.txt"
     )
     args: Namespace = parser.parse_args()
-    path_map = Path(args.map)
+    path_map = str(Path(args.map))
     settings = parse_file(path_map, settings)
     return settings
 
@@ -75,8 +75,11 @@ def extract_hub_info(line: str) -> Hub:
     info_list = get_info_str.split(" ", 3)
     new_hub = Hub()
     new_hub.name = info_list[0]
-    new_hub.x = info_list[1]
-    new_hub.y = info_list[2]
+    try:
+        new_hub.x = int(info_list[1])
+        new_hub.y = int(info_list[2])
+    except ValueError:
+        raise ParsingError(f"Invalid coordinates for {new_hub.name}")
     if info_list[3]:
         meta_data_list = info_list[3].split(" ")
         for data in meta_data_list:

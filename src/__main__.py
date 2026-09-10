@@ -22,7 +22,7 @@ def print_start_information(settings: FlyInSettings) -> None:
     for hub in settings.hubs_list:
         print(Fore.LIGHTCYAN_EX + "Hub: " + Fore.RESET,
               hub.name, hub.x, hub.y, hub.meta_data.colour,
-              hub.meta_data.max_drones, hub.meta_data.zone + Fore.RESET)
+              hub.meta_data.max_drones, hub.meta_data.zone, "" + Fore.RESET)
     print("")
     for connection in settings.connections_list:
         print(Fore.LIGHTCYAN_EX + "Connection: " + Fore.RESET, end="")
