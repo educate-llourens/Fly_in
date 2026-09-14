@@ -1,17 +1,17 @@
 from colorama import Fore
 from src.classes import FlyInSettings, InputError, ParsingError
+from pydantic import ValidationError
 from src.parsing import parsing
+from sys import exit
 
 
 def fly_in() -> None:
     try:
         settings: FlyInSettings = parsing()
-        if not settings:
-            print(Fore.RED + "Parsing Error: Settings is empty" + Fore.RESET)
         print_start_information(settings)
-    except (FileExistsError, FileNotFoundError, ValueError, InputError,
-            ParsingError) as msg:
+    except (InputError, ParsingError, ValidationError) as msg:
         print(Fore.RED + str(msg))
+        exit(1)
     return
 
 

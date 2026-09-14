@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from src.classes import (FlyInSettings, InputError, ParsingError, Hub,
                          Connection)
-from sys import argv, maxsize
+from sys import argv
 
 # Functions in ----------------------------------------------------------------
 # 1. parsing
@@ -14,6 +14,14 @@ from sys import argv, maxsize
 
 
 def parsing() -> FlyInSettings:
+    """Handles the parsing of the information.
+
+    Raises:
+        InputError: If the file is not the only argument
+
+    Returns:
+        FlyInSettings: Instance of overall settings information
+    """
     settings: FlyInSettings = FlyInSettings()
 
     if len(argv) > 2:
@@ -31,8 +39,21 @@ def parsing() -> FlyInSettings:
 
 
 def parse_file(file_path: str, settings: FlyInSettings) -> FlyInSettings:
-    start_hub_count: int = 0
-    end_hub_count: int = 0
+    """Parses the map file and distributes the information into their
+    appropriate classes.
+
+    Args:
+        file_path (str): Path to map file
+        settings (FlyInSettings): Instance of the overall settings
+        information
+
+    Raises:
+        ParsingError: More than one start hub detected
+        ParsingError: More than one end hub detected
+
+    Returns:
+        FlyInSettings: Instance of the overall settings
+    """
 
     with open(file_path, "r") as config_file:
         for line in config_file:
@@ -40,24 +61,14 @@ def parse_file(file_path: str, settings: FlyInSettings) -> FlyInSettings:
             if line.startswith("nb_drones"):
                 settings.nbr_drones = int(line.split(":", 1)[1])
             elif line.startswith("start_hub"):
-                if start_hub_count == 1:
-                    raise ParsingError("parse_file detected more than "
-                                       "one start_hub")
                 settings.start_hub = extract_hub_info(line)
                 settings.hubs_list.insert(0, settings.start_hub)
-                settings.start_hub.meta_data.zone = maxsize
-                start_hub_count += 1
             elif line.startswith("hub"):
                 settings.hubs_list.append(extract_hub_info(line))
             elif line.startswith("end_hub"):
-                if end_hub_count == 1:
-                    raise ParsingError("parse_file detected more than "
-                                       "one end_hub")
                 settings.end_hub = extract_hub_info(line)
                 settings.hubs_list.insert(
                     len(settings.hubs_list), settings.end_hub)
-                settings.end_hub.meta_data.max_drones = maxsize
-                end_hub_count += 1
             elif (line.startswith("connection")):
                 connection: Connection = extract_connection(
                     line, settings.hubs_list)
@@ -66,6 +77,17 @@ def parse_file(file_path: str, settings: FlyInSettings) -> FlyInSettings:
 
 
 def extract_hub_info(line: str) -> Hub:
+    """Extracts the information for the hub and sticks it in the hub instance
+
+    Args:
+        line (str): The line from the map file that wer are parsing
+
+    Raises:
+        ParsingError: If hub coordinates are invalid
+
+    Returns:
+        Hub: A hub instance
+    """
     new_hub: Hub
     get_info_str: str
     info_list: list[str]
@@ -96,6 +118,15 @@ def extract_hub_info(line: str) -> Hub:
 
 
 def extract_connection(line: str, hubs_list: list[Hub]) -> Connection:
+    """Extracts information for the connection
+
+    Args:
+        line (str): Line being parsed
+        hubs_list (list[Hub]): List of hub instances
+
+    Returns:
+        Connection: A connection instance
+    """
     connections: str = line.split(": ", 1)[1]
     get_connections_list: list[str] = connections.split(" ")
     connections_list: list[str] = (
@@ -117,3 +148,33 @@ def find_hub(hubs_list: list[Hub], hub_name: str) -> Hub:
         if hub.name == hub_name:
             return hub
     raise ParsingError("Could not find hub in find_hub")
+
+
+# def validate_settings(settings: FlyInSettings) -> None:
+#     """Validates additional edge cases
+
+#     Args:
+#         settings (FlyInSettings): The overall settings instance we need
+#         to check.
+#     """
+#     names_list: list[str] = [hub.name for hub in settings.hubs_list]
+#     counter: Counter = Counter(names_list)
+#     duplicate_hub_names: list[str] = [
+#         name for name, count in counter.items() if count > 1]
+#     if len(duplicate_hub_names) > 0:
+#         raise ParsingError(f"Duplicate names for {duplicate_hub_names}. "
+#                            "Please remove all duplicates")
+#     for hub in settings.hubs_list:
+#         for chr in hub.name:
+#             if not chr.isprintable() or chr == " " or chr == "-":
+#                 raise ParsingError(f"{hub.name} must have printable characters"
+#                                    " that are not a space or dash")
+#     connections_list: list[list] = [
+#         connection.hubs_list for connection in settings.connections_list]
+#     counter: Counter = Counter(connections_list)
+#     duplicates: list[list] =
+    # TODO: The same connection must not appear more than once
+    # TODO: Zone types must be one of: normal, blocked, restricted, priority.
+    # Any invalid type must raise a parsing error
+    # TODO: Capacity values (max_drones for zones, max_link_capacity for
+    # connections) must be positive integers.
