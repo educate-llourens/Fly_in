@@ -12,11 +12,18 @@
 3. Activate the virtual environment: <br>
 `activate .venv/bin/activate`
 
+4. Run the program with the default map with: <br>
+`make`
+
+5. Run the program with a custom map using: <br>
+`make MAP="folders/map_path.txt"`
+
 # Resources
 ## Documentation
+[Pydantic Documentation](https://pydantic.dev/docs/validation/latest/get-started/)
 
 ## AI Usage
-- Creating lessons for parts of the project using scaffolding teaching methods (no code answers)
+- Creating lessons for parts of the project using scaffolding teaching methods
 - Q & A sessions about topics I was not clear on
 - Creating quizzes and notes for learning
 

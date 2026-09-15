@@ -21,6 +21,38 @@ class FlyInSettings(BaseModel):
     end_hub: "Hub" = Field(default_factory=lambda: Hub())
     connections_list: list["Connection"] = Field(default_factory=list)
 
+    @model_validator(mode="after")
+    def settings_validation(self) -> "FlyInSettings":
+        # Duplicate names -------------------------------------------
+        names_list: list[str] = [hub.name for hub in self.hubs_list]
+        counter: Counter = Counter(names_list)
+        duplicate_hub_names: list[str] = [
+            name for name, count in counter.items() if count > 1]
+        if len(duplicate_hub_names) > 0:
+            raise ParsingError(f"Duplicate names for {duplicate_hub_names}. "
+                               "Please remove all duplicates")
+        # Duplicate connections -------------------------------------
+        connections_name_list: list[tuple[str, str]] = []
+        for connection in self.connections_list:
+            hub_1, hub_2 = connection.hubs_list
+            connections_name_list.append((hub_1.name, hub_2.name))
+        counter: Counter = Counter(connections_name_list)
+        duplicate_connections_list: list[tuple[str, str]] = [
+            connection for connection, count in counter.items() if count > 1
+        ]
+        if len(duplicate_connections_list) > 0:
+            raise ParsingError(
+                f"Duplicate connections for {duplicate_connections_list}. "
+                "Please remove all duplicates")
+        # Start and end hub no max drone limit ----------------------
+        if self.start_hub.meta_data:
+            if self.start_hub.meta_data.max_drones:
+                self.start_hub.meta_data.max_drones = maxsize
+        if self.end_hub.meta_data:
+            if self.end_hub.meta_data.max_drones:
+                self.end_hub.meta_data.max_drones = maxsize
+        return self
+
 
 class Hub(BaseModel):
     """Settings information for the hubs
@@ -33,24 +65,26 @@ class Hub(BaseModel):
         zone: str = Field(default="normal")
         # TODO: String to enum for colours
         colour: str = Field(default="None")
-        max_drones: int = Field(default=maxsize)
+        max_drones: int = Field(default=1, ge=0)
 
     name: str = Field(default="")
-    x: int = Field(default=(maxsize), gt=0)
-    y: int = Field(default=maxsize, gt=0)
-    meta_data: MetaData | None = Field(default_factory=MetaData)
+    x: int = Field(default=(maxsize), ge=0)
+    y: int = Field(default=maxsize, ge=0)
+    meta_data: MetaData | None = Field(default=None)
 
     @model_validator(mode="after")
     def hub_validation(self) -> "Hub":
+        # Valid Hub name --------------------------------------------
         for chr in self.name:
             if not chr.isprintable() or chr == " " or chr == "-":
                 raise ParsingError(f"{self.name} is not a valid hub name")
+        # Valid zone type -------------------------------------------
         if self.meta_data:
             zone_set: set[str] = {
                 "normal", "blocked", "restricted", "priority"}
             if self.meta_data.zone not in zone_set:
                 raise ParsingError(
-                    f"{self.name}.{self.meta_data.zone} is not a valid "
+                    f"{self.name} -> {self.meta_data.zone} is not a valid "
                     "zone name")
         return self
 
@@ -58,8 +92,8 @@ class Hub(BaseModel):
 class Connection(BaseModel):
     """Settings information for the Connection
     """
-    hubs_list: list[Hub] = Field(default_factory=list)
-    max_link_capacity: int = Field(default=1, ge=0)
+    hubs_list: tuple[Hub, Hub] = Field(default_factory=lambda: (Hub(), Hub()))
+    max_link_capacity: int | None = Field(default=None, ge=0)
 
 
 class InputError(Exception):

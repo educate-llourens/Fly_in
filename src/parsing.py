@@ -2,6 +2,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from src.classes import (FlyInSettings, InputError, ParsingError, Hub,
                          Connection)
+from pydantic import ValidationError
 from sys import argv
 
 # Functions in ----------------------------------------------------------------
@@ -58,21 +59,28 @@ def parse_file(file_path: str, settings: FlyInSettings) -> FlyInSettings:
     with open(file_path, "r") as config_file:
         for line in config_file:
             line = line.strip()
-            if line.startswith("nb_drones"):
-                settings.nbr_drones = int(line.split(":", 1)[1])
-            elif line.startswith("start_hub"):
-                settings.start_hub = extract_hub_info(line)
-                settings.hubs_list.insert(0, settings.start_hub)
-            elif line.startswith("hub"):
-                settings.hubs_list.append(extract_hub_info(line))
-            elif line.startswith("end_hub"):
-                settings.end_hub = extract_hub_info(line)
-                settings.hubs_list.insert(
-                    len(settings.hubs_list), settings.end_hub)
-            elif (line.startswith("connection")):
-                connection: Connection = extract_connection(
-                    line, settings.hubs_list)
-                settings.connections_list.append(connection)
+            try:
+                if line.startswith("nb_drones"):
+                    settings.nbr_drones = int(line.split(":", 1)[1])
+                elif line.startswith("start_hub"):
+                    if settings.start_hub.name:
+                        raise ParsingError(f"{line} | Duplicate start hub")
+                    settings.start_hub = extract_hub_info(line)
+                    settings.hubs_list.insert(0, settings.start_hub)
+                elif line.startswith("hub"):
+                    settings.hubs_list.append(extract_hub_info(line))
+                elif line.startswith("end_hub"):
+                    if settings.end_hub.name:
+                        raise ParsingError(f"{line} | Duplicate end hub")
+                    settings.end_hub = extract_hub_info(line)
+                    settings.hubs_list.insert(
+                        len(settings.hubs_list), settings.end_hub)
+                elif (line.startswith("connection")):
+                    connection: Connection = extract_connection(
+                        line, settings.hubs_list)
+                    settings.connections_list.append(connection)
+            except ValidationError as msg:
+                raise ValidationError(f"{line} | {msg}")
     return settings
 
 
@@ -105,6 +113,8 @@ def extract_hub_info(line: str) -> Hub:
     if info_list[3]:
         meta_data_list = info_list[3].split(" ")
         for data in meta_data_list:
+            if new_hub.meta_data is None:
+                new_hub.meta_data = new_hub.MetaData()
             if "color" in data:
                 new_hub.meta_data.colour = (
                     data.split("color=")[1].replace("]", ""))
@@ -132,9 +142,12 @@ def extract_connection(line: str, hubs_list: list[Hub]) -> Connection:
     connections_list: list[str] = (
         get_connections_list[0].split("-"))
     connection: Connection = Connection()
+    connection_hubs_list: list[Hub] = []
     for i in range(len(connections_list)):
         hub = find_hub(hubs_list, connections_list[i])
-        connection.hubs_list.append(hub)
+        connection_hubs_list.append(hub)
+    connection.hubs_list = (
+        connection_hubs_list[0], connection_hubs_list[1])
     if len(get_connections_list) > 1:
         connections_metadata: str = get_connections_list[1]
         connection.max_link_capacity = int(
@@ -148,33 +161,3 @@ def find_hub(hubs_list: list[Hub], hub_name: str) -> Hub:
         if hub.name == hub_name:
             return hub
     raise ParsingError("Could not find hub in find_hub")
-
-
-# def validate_settings(settings: FlyInSettings) -> None:
-#     """Validates additional edge cases
-
-#     Args:
-#         settings (FlyInSettings): The overall settings instance we need
-#         to check.
-#     """
-#     names_list: list[str] = [hub.name for hub in settings.hubs_list]
-#     counter: Counter = Counter(names_list)
-#     duplicate_hub_names: list[str] = [
-#         name for name, count in counter.items() if count > 1]
-#     if len(duplicate_hub_names) > 0:
-#         raise ParsingError(f"Duplicate names for {duplicate_hub_names}. "
-#                            "Please remove all duplicates")
-#     for hub in settings.hubs_list:
-#         for chr in hub.name:
-#             if not chr.isprintable() or chr == " " or chr == "-":
-#                 raise ParsingError(f"{hub.name} must have printable characters"
-#                                    " that are not a space or dash")
-#     connections_list: list[list] = [
-#         connection.hubs_list for connection in settings.connections_list]
-#     counter: Counter = Counter(connections_list)
-#     duplicates: list[list] =
-    # TODO: The same connection must not appear more than once
-    # TODO: Zone types must be one of: normal, blocked, restricted, priority.
-    # Any invalid type must raise a parsing error
-    # TODO: Capacity values (max_drones for zones, max_link_capacity for
-    # connections) must be positive integers.
