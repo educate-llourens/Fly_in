@@ -20,7 +20,8 @@
 
 # Resources
 ## Documentation
-[Pydantic Documentation](https://pydantic.dev/docs/validation/latest/get-started/)
+[Pydantic Documentation](https://pydantic.dev/docs/validation/latest/get-started/)<br>
+[Rich documentation](https://rich.readthedocs.io)<br>
 
 ## AI Usage
 - Creating lessons for parts of the project using scaffolding teaching methods

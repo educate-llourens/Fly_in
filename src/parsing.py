@@ -1,8 +1,8 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from src.classes import (FlyInSettings, InputError, ParsingError, Hub,
-                         Connection)
-from pydantic import ValidationError
+                         Connection, Zone)
+from rich.errors import StyleSyntaxError
 from sys import argv
 
 # Functions in ----------------------------------------------------------------
@@ -59,28 +59,25 @@ def parse_file(file_path: str, settings: FlyInSettings) -> FlyInSettings:
     with open(file_path, "r") as config_file:
         for line in config_file:
             line = line.strip()
-            try:
-                if line.startswith("nb_drones"):
-                    settings.nbr_drones = int(line.split(":", 1)[1])
-                elif line.startswith("start_hub"):
-                    if settings.start_hub.name:
-                        raise ParsingError(f"{line} | Duplicate start hub")
-                    settings.start_hub = extract_hub_info(line)
-                    settings.hubs_list.insert(0, settings.start_hub)
-                elif line.startswith("hub"):
-                    settings.hubs_list.append(extract_hub_info(line))
-                elif line.startswith("end_hub"):
-                    if settings.end_hub.name:
-                        raise ParsingError(f"{line} | Duplicate end hub")
-                    settings.end_hub = extract_hub_info(line)
-                    settings.hubs_list.insert(
-                        len(settings.hubs_list), settings.end_hub)
-                elif (line.startswith("connection")):
-                    connection: Connection = extract_connection(
-                        line, settings.hubs_list)
-                    settings.connections_list.append(connection)
-            except ValidationError as msg:
-                raise ValidationError(f"{line} | {msg}")
+            if line.startswith("nb_drones"):
+                settings.nbr_drones = int(line.split(":", 1)[1])
+            elif line.startswith("start_hub"):
+                if settings.start_hub.name:
+                    raise ParsingError(f"{line} | Duplicate start hub")
+                settings.start_hub = extract_hub_info(line)
+                settings.hubs_list.insert(0, settings.start_hub)
+            elif line.startswith("hub"):
+                settings.hubs_list.append(extract_hub_info(line))
+            elif line.startswith("end_hub"):
+                if settings.end_hub.name:
+                    raise ParsingError(f"{line} | Duplicate end hub")
+                settings.end_hub = extract_hub_info(line)
+                settings.hubs_list.insert(
+                    len(settings.hubs_list), settings.end_hub)
+            elif (line.startswith("connection")):
+                connection: Connection = extract_connection(
+                    line, settings.hubs_list)
+                settings.connections_list.append(connection)
     return settings
 
 
@@ -96,34 +93,41 @@ def extract_hub_info(line: str) -> Hub:
     Returns:
         Hub: A hub instance
     """
-    new_hub: Hub
     get_info_str: str
     info_list: list[str]
     meta_data_list: list[str]
+    meta_data: Hub.MetaData | None = None
 
     get_info_str = line.split(": ")[1]
     info_list = get_info_str.split(" ", 3)
-    new_hub = Hub()
-    new_hub.name = info_list[0]
+    name = info_list[0]
     try:
-        new_hub.x = int(info_list[1])
-        new_hub.y = int(info_list[2])
+        x = int(info_list[1])
+        y = int(info_list[2])
     except ValueError:
-        raise ParsingError(f"Invalid coordinates for {new_hub.name}")
+        raise ParsingError(f"Invalid coordinates for {name}")
     if info_list[3]:
         meta_data_list = info_list[3].split(" ")
         for data in meta_data_list:
-            if new_hub.meta_data is None:
-                new_hub.meta_data = new_hub.MetaData()
+            if meta_data is None:
+                meta_data = Hub.MetaData()
             if "color" in data:
-                new_hub.meta_data.colour = (
-                    data.split("color=")[1].replace("]", ""))
+                try:
+                    meta_data.colour = (
+                        data.split("color=")[1].replace("]", ""))
+                except StyleSyntaxError:
+                    raise ParsingError(f"Invalid colour for {name}")
             if "zone" in data:
-                new_hub.meta_data.zone = (
+                zone_str: str = (
                     data.split("zone=")[1].replace("]", ""))
+                try:
+                    meta_data.zone = Zone(zone_str)
+                except ValueError:
+                    raise ParsingError(f"Invalid zone for {name}")
             if "max_drones" in data:
-                new_hub.meta_data.max_drones = (
+                meta_data.max_drones = (
                     int(data.split("max_drones=")[1].replace("]", "")))
+    new_hub = Hub(name=name, x=x, y=y, meta_data=meta_data)
     return new_hub
 
 
@@ -141,18 +145,19 @@ def extract_connection(line: str, hubs_list: list[Hub]) -> Connection:
     get_connections_list: list[str] = connections.split(" ")
     connections_list: list[str] = (
         get_connections_list[0].split("-"))
-    connection: Connection = Connection()
     connection_hubs_list: list[Hub] = []
     for i in range(len(connections_list)):
         hub = find_hub(hubs_list, connections_list[i])
         connection_hubs_list.append(hub)
-    connection.hubs_list = (
-        connection_hubs_list[0], connection_hubs_list[1])
+    hubs_tuple = (connection_hubs_list[0], connection_hubs_list[1])
+    max_link_capacity = 1
     if len(get_connections_list) > 1:
         connections_metadata: str = get_connections_list[1]
-        connection.max_link_capacity = int(
+        max_link_capacity = int(
             connections_metadata.split(
                 "max_link_capacity=")[1].replace("]", ""))
+    connection = Connection(
+        hubs_list=hubs_tuple, max_link_capacity=max_link_capacity)
     return connection
 
 

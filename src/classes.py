@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sys import maxsize
 from collections import Counter
+from rich.style import Style
+from enum import Enum
 
 # Classes list ----------------------------------------------------------------
 # 1. FlyInSettings
@@ -36,7 +38,7 @@ class FlyInSettings(BaseModel):
         for connection in self.connections_list:
             hub_1, hub_2 = connection.hubs_list
             connections_name_list.append((hub_1.name, hub_2.name))
-        counter: Counter = Counter(connections_name_list)
+        counter = Counter(connections_name_list)
         duplicate_connections_list: list[tuple[str, str]] = [
             connection for connection, count in counter.items() if count > 1
         ]
@@ -54,6 +56,13 @@ class FlyInSettings(BaseModel):
         return self
 
 
+class Zone(Enum):
+    normal = "normal"
+    blocked = "blocked"
+    restricted = "restricted"
+    priority = "priority"
+
+
 class Hub(BaseModel):
     """Settings information for the hubs
     name
@@ -61,11 +70,20 @@ class Hub(BaseModel):
     class MetaData(BaseModel):
         """Metadata for the hub
         """
-        # TODO: Make an enum
-        zone: str = Field(default="normal")
-        # TODO: String to enum for colours
-        colour: str = Field(default="None")
+        model_config = ConfigDict(arbitrary_types_allowed=True)
+        zone: Zone = Field(default=Zone.normal)
+        colour: str = Field(default="default")
+        print_style: Style = Field(
+            default_factory=lambda: Style.parse("default"))
         max_drones: int = Field(default=1, ge=0)
+
+        @model_validator(mode="after")
+        def set_print_style(self):
+            if self.colour == "orange":
+                self.print_style = Style.parse("orange1")
+            else:
+                self.print_style = Style.parse(self.colour)
+            return self
 
     name: str = Field(default="")
     x: int = Field(default=(maxsize), ge=0)
@@ -78,14 +96,6 @@ class Hub(BaseModel):
         for chr in self.name:
             if not chr.isprintable() or chr == " " or chr == "-":
                 raise ParsingError(f"{self.name} is not a valid hub name")
-        # Valid zone type -------------------------------------------
-        if self.meta_data:
-            zone_set: set[str] = {
-                "normal", "blocked", "restricted", "priority"}
-            if self.meta_data.zone not in zone_set:
-                raise ParsingError(
-                    f"{self.name} -> {self.meta_data.zone} is not a valid "
-                    "zone name")
         return self
 
 
