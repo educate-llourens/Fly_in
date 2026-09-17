@@ -3,6 +3,7 @@ from sys import maxsize
 from collections import Counter
 from rich.style import Style
 from enum import Enum
+from src.error_handling import ParsingError
 
 # Classes list ----------------------------------------------------------------
 # 1. FlyInSettings
@@ -103,24 +104,18 @@ class Connection(BaseModel):
     """Settings information for the Connection
     """
     hubs_list: tuple[Hub, Hub] = Field(default_factory=lambda: (Hub(), Hub()))
+    connection_start_hub: Hub | None = Field(default=None)
+    connection_end_hub: Hub | None = Field(default=None)
     max_link_capacity: int | None = Field(default=None, ge=0)
 
-
-class InputError(Exception):
-    def __init__(self, msg: str) -> None:
-        """Error message specific to user input
-
-        Args:
-            msg (str): The message to display
-        """
-        super().__init__(f"Input Error: {msg}")
+    @model_validator(mode="after")
+    def set_endpoints(self):
+        self.connection_start_hub, self.connection_end_hub = self.hubs_list
+        return self
 
 
-class ParsingError(Exception):
-    def __init__(self, msg: str) -> None:
-        """Error message specific to Parsing
+class Drone(BaseModel):
+    id: int = Field(ge=0)
 
-        Args:
-            msg (str): The message to display
-        """
-        super().__init__(f"Parsing Error: {msg}")
+    def __init__(self, id: int) -> None:
+        self.id: int = id

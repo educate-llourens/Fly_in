@@ -2,7 +2,7 @@ from rich import print
 from logging import getLogger
 from rich.console import Console
 from rich.logging import RichHandler
-from src.classes import FlyInSettings
+from src.settings import FlyInSettings
 
 
 def basic_error_logging(msg: str) -> None:

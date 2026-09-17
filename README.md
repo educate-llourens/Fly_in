@@ -22,6 +22,10 @@
 ## Documentation
 [Pydantic Documentation](https://pydantic.dev/docs/validation/latest/get-started/)<br>
 [Rich documentation](https://rich.readthedocs.io)<br>
+## Articles and other research
+[Dijkstra's algorithm, Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) <br>
+[Graph theory](https://en.wikipedia.org/wiki/Graph_theory) <br>
+[Path finding, Wikipedia](https://en.wikipedia.org/wiki/Pathfinding) <br>
 
 ## AI Usage
 - Creating lessons for parts of the project using scaffolding teaching methods
