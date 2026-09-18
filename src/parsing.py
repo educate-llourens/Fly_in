@@ -127,7 +127,8 @@ class Parser:
         for i in range(len(connections_list)):
             hub = self.find_hub(hubs_list, connections_list[i])
             connection_hubs_list.append(hub)
-        hubs_tuple = (connection_hubs_list[0], connection_hubs_list[1])
+        connection_start_hub = connection_hubs_list[0]
+        connection_end_hub = connection_hubs_list[1]
         max_link_capacity = 1
         if len(get_connections_list) > 1:
             connections_metadata: str = get_connections_list[1]
@@ -135,7 +136,9 @@ class Parser:
                 connections_metadata.split(
                     "max_link_capacity=")[1].replace("]", ""))
         connection = Connection(
-            hubs_list=hubs_tuple, max_link_capacity=max_link_capacity)
+            connection_start_hub=connection_start_hub,
+            connection_end_hub=connection_end_hub,
+            max_link_capacity=max_link_capacity)
         return connection
 
     def find_hub(self, hubs_list: list[Hub], hub_name: str) -> Hub:

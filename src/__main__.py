@@ -15,12 +15,12 @@ def fly_in() -> None:
     if len(argv) > 2:
         raise InputError("The program only takes the config file as "
                          "an argument")
-    parser = ArgumentParser()
-    parser.add_argument(
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument(
         "map",
         default="maps/01_linear_path.txt"
     )
-    args: Namespace = parser.parse_args()
+    args: Namespace = arg_parser.parse_args()
     path_map = str(Path(args.map))
     parser: Parser = Parser(path_map)
     try:
@@ -37,7 +37,7 @@ def fly_in() -> None:
     log_start_information(settings)
 
     # Simulation --------------------------------------------------------------
-    simulation: SimulationEngine = SimulationEngine(settings)
+    # simulation: SimulationEngine = SimulationEngine(settings)
     return
 
 

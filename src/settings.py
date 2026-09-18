@@ -19,6 +19,7 @@ class FlyInSettings(BaseModel):
     """Creates the overview settings class.
     """
     nbr_drones: int = Field(default=maxsize, gt=0)
+    drones_list: list["Drone"] = Field(default_factory=list)
     hubs_list: list["Hub"] = Field(default_factory=list)
     start_hub: "Hub" = Field(default_factory=lambda: Hub())
     end_hub: "Hub" = Field(default_factory=lambda: Hub())
@@ -37,8 +38,8 @@ class FlyInSettings(BaseModel):
         # Duplicate connections -------------------------------------
         connections_name_list: list[tuple[str, str]] = []
         for connection in self.connections_list:
-            hub_1, hub_2 = connection.hubs_list
-            connections_name_list.append((hub_1.name, hub_2.name))
+            connections_name_list.append((connection.connection_start_hub.name,
+                                          connection.connection_end_hub.name))
         counter = Counter(connections_name_list)
         duplicate_connections_list: list[tuple[str, str]] = [
             connection for connection, count in counter.items() if count > 1
@@ -54,7 +55,16 @@ class FlyInSettings(BaseModel):
         if self.end_hub.meta_data:
             if self.end_hub.meta_data.max_drones:
                 self.end_hub.meta_data.max_drones = maxsize
+        # Drone_id's correct ----------------------------------------
+        for drone in self.drones_list:
+            if drone.id == maxsize and len(self.drones_list) + 1 < maxsize:
+                raise ParsingError(f"Drone id {maxsize} should be less than "
+                                   f"{self.nbr_drones}")
         return self
+
+    def create_drones(self) -> None:
+        for i in range(self.nbr_drones - 1):
+            self.drones_list.append(Drone(id=i + 1))
 
 
 class Zone(Enum):
@@ -103,19 +113,10 @@ class Hub(BaseModel):
 class Connection(BaseModel):
     """Settings information for the Connection
     """
-    hubs_list: tuple[Hub, Hub] = Field(default_factory=lambda: (Hub(), Hub()))
-    connection_start_hub: Hub | None = Field(default=None)
-    connection_end_hub: Hub | None = Field(default=None)
+    connection_start_hub: Hub = Field(default_factory=lambda: Hub())
+    connection_end_hub: Hub = Field(default_factory=lambda: Hub())
     max_link_capacity: int | None = Field(default=None, ge=0)
-
-    @model_validator(mode="after")
-    def set_endpoints(self):
-        self.connection_start_hub, self.connection_end_hub = self.hubs_list
-        return self
 
 
 class Drone(BaseModel):
-    id: int = Field(ge=0)
-
-    def __init__(self, id: int) -> None:
-        self.id: int = id
+    id: int = Field(default=maxsize, ge=0)

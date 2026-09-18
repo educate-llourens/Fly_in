@@ -38,6 +38,7 @@ def log_start_information(settings: FlyInSettings) -> None:
         print("[cyan]Hub: [/cyan] [default]"
               f"{hub.name} {hub.x} {hub.y}[/default]", end=" ")
         if hub.meta_data:
+            print("[cyan] |[/cyan]", end=" ")
             print(
                 f"[cyan]Colour:[/cyan] {hub.meta_data.colour}"
                 "[cyan] Max drones:[/cyan] [default]"
@@ -48,8 +49,10 @@ def log_start_information(settings: FlyInSettings) -> None:
     print("")
     for connection in settings.connections_list:
         print("[cyan]Connection: [/cyan]", end="")
-        for hub in connection.hubs_list:
-            print(hub.name, end=" ")
+        print(f"[default]{connection.connection_start_hub.name}[/default]",
+              end=" ")
+        print(f"[default]{connection.connection_end_hub.name}[/default]",
+              end=" ")
         if connection.max_link_capacity:
             print("[cyan]| Max link capacity: [/cyan]"
                   f"[default]{connection.max_link_capacity}[/default]")
