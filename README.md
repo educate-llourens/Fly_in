@@ -23,14 +23,18 @@
 [Pydantic Documentation](https://pydantic.dev/docs/validation/latest/get-started/)<br>
 [Rich documentation](https://rich.readthedocs.io)<br>
 ## Articles and other research
-[Dijkstra's algorithm, Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) <br>
 [Graph theory](https://en.wikipedia.org/wiki/Graph_theory) <br>
+[Adjacency Medium article](https://medium.com/@ging.m.louie/easy-python-implementation-of-a-graph-as-an-adjacency-list-ced5ff4fecc8) <br>
+[Implement adjacency matrix in Python](https://ssojet.com/data-structures/implement-adjacency-matrix-in-python#adding-edges-to-the-matrix) <br>
+[Dijkstra's algorithm, Wikipedia](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) <br>
 [Path finding, Wikipedia](https://en.wikipedia.org/wiki/Pathfinding) <br>
 
 ## AI Usage
-- Creating lessons for parts of the project using scaffolding teaching methods
-- Q & A sessions about topics I was not clear on
+- Creating lessons for parts of the project using a combination of scaffolding and demonstration first teaching methods. No code anwers that I can copy into my project.
+- Q & A sessions about topics throughout the project
 - Creating quizzes and notes for learning
+- Writing unit tests. Common in development because they are not difficult and annoying to do.
+*The goal is long term learning and retention built around repition and how I learn best*
 
 # Algorithm explanation
 
