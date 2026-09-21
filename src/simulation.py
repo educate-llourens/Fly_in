@@ -1,4 +1,3 @@
-from src.error_handling import SimulationError
 from src.settings import FlyInSettings, Connection
 
 
@@ -6,6 +5,9 @@ class SimulationEngine:
     def __init__(self, settings: FlyInSettings) -> None:
         self.settings = settings
         self.graph = self.create_graph()
+
+        for hub in settings.hubs_list:
+            hub.hub_rules()
 
     def create_graph(self) -> dict[str, list[Connection]]:
         graph_dict: dict[str, list[Connection]] = {}

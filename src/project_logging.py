@@ -43,7 +43,7 @@ def log_start_information(settings: FlyInSettings) -> None:
                 f"[cyan]Colour:[/cyan] {hub.meta_data.colour}"
                 "[cyan] Max drones:[/cyan] [default]"
                 f"{hub.meta_data.max_drones}[/default]"
-                f"[cyan] Zone:[/cyan] {hub.meta_data.zone}")
+                f"[cyan] Zone:[/cyan] {hub.meta_data.hub_access_type}")
         else:
             print("")
     print("")

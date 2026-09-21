@@ -1,5 +1,5 @@
 from src.settings import (
-    FlyInSettings, Hub, Connection, Zone)
+    FlyInSettings, Hub, Connection, HubAccessType)
 from src.error_handling import ParsingError
 from rich.errors import StyleSyntaxError
 
@@ -99,9 +99,10 @@ class Parser:
                     zone_str: str = (
                         data.split("zone=")[1].replace("]", ""))
                     try:
-                        meta_data.zone = Zone(zone_str)
+                        meta_data.hub_access_type = HubAccessType(zone_str)
                     except ValueError:
-                        raise ParsingError(f"Invalid zone for {name}")
+                        raise ParsingError(
+                            f"Invalid hub access type for {name}")
                 if "max_drones" in data:
                     meta_data.max_drones = (
                         int(data.split("max_drones=")[1].replace("]", "")))

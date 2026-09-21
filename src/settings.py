@@ -67,7 +67,7 @@ class FlyInSettings(BaseModel):
             self.drones_list.append(Drone(id=i + 1))
 
 
-class Zone(Enum):
+class HubAccessType(Enum):
     normal = "normal"
     blocked = "blocked"
     restricted = "restricted"
@@ -82,7 +82,7 @@ class Hub(BaseModel):
         """Metadata for the hub
         """
         model_config = ConfigDict(arbitrary_types_allowed=True)
-        zone: Zone = Field(default=Zone.normal)
+        hub_access_type: HubAccessType = Field(default=HubAccessType.normal)
         colour: str = Field(default="default")
         print_style: Style = Field(
             default_factory=lambda: Style.parse("default"))
@@ -100,6 +100,8 @@ class Hub(BaseModel):
     x: int = Field(default=(maxsize), ge=0)
     y: int = Field(default=maxsize, ge=0)
     meta_data: MetaData | None = Field(default=None)
+    turn_cost: int = Field(default=1)
+    priority: int = Field(default=2)
 
     @model_validator(mode="after")
     def hub_validation(self) -> "Hub":
@@ -108,6 +110,17 @@ class Hub(BaseModel):
             if not chr.isprintable() or chr == " " or chr == "-":
                 raise ParsingError(f"{self.name} is not a valid hub name")
         return self
+
+    def hub_rules(self) -> None:
+        hub_access_rules: dict[HubAccessType, tuple[int, int]] = {
+            HubAccessType.normal: (1, 2),
+            HubAccessType.priority: (1, 3),
+            HubAccessType.restricted: (2, 1),
+            HubAccessType.blocked: (maxsize, 0)
+        }
+        if self.meta_data:
+            self.turn_cost, self.priority = (
+                hub_access_rules[self.meta_data.hub_access_type])
 
 
 class Connection(BaseModel):
