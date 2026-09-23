@@ -37,7 +37,8 @@ def fly_in() -> None:
     log_start_information(settings)
 
     # Simulation --------------------------------------------------------------
-    # simulation: SimulationEngine = SimulationEngine(settings)
+    simulation: SimulationEngine = SimulationEngine(settings)
+    simulation.run_simulation()
     return
 
 

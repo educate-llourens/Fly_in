@@ -64,7 +64,8 @@ class FlyInSettings(BaseModel):
 
     def create_drones(self) -> None:
         for i in range(self.nbr_drones - 1):
-            self.drones_list.append(Drone(id=i + 1))
+            self.drones_list.append(
+                Drone(id=i + 1, current_hub_name=self.start_hub.name))
 
 
 class HubAccessType(Enum):
@@ -99,9 +100,10 @@ class Hub(BaseModel):
     name: str = Field(default="")
     x: int = Field(default=(maxsize), ge=0)
     y: int = Field(default=maxsize, ge=0)
-    meta_data: MetaData | None = Field(default=None)
+    meta_data: MetaData = Field(default_factory=lambda: Hub.MetaData())
     turn_cost: int = Field(default=1)
     priority: int = Field(default=2)
+    nbr_hub_drones: int = Field(default=0)
 
     @model_validator(mode="after")
     def hub_validation(self) -> "Hub":
@@ -133,3 +135,4 @@ class Connection(BaseModel):
 
 class Drone(BaseModel):
     id: int = Field(default=maxsize, ge=0)
+    current_hub_name: str = Field(default="")
