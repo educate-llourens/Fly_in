@@ -38,7 +38,8 @@ def fly_in() -> None:
 
     # Simulation --------------------------------------------------------------
     simulation: SimulationEngine = SimulationEngine(settings)
-    simulation.run_simulation()
+    settings.create_drones()
+    simulation.move_drones()
     return
 
 

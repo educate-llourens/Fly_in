@@ -1,4 +1,5 @@
 from src.settings import FlyInSettings, Connection, Hub, HubAccessType
+from src.project_logging import basic_error_logging
 from rich import print
 
 
@@ -25,29 +26,31 @@ class SimulationEngine:
             graph_dict[end_name].append(connection)
         return graph_dict
 
-    def run_simulation(self) -> None:
-        settings = self.settings
-        # start_hub = self.settings.start_hub
+    def move_drones(self) -> None:
         end_hub = self.settings.end_hub
         drones_list = self.settings.drones_list
         graph = self.graph
+        turn: int = 0
 
-        while end_hub.nbr_hub_drones < settings.nbr_drones:
-            self.nbr_turns += 1
+        while (len([drone
+                    for drone in drones_list
+                    if drone.current_hub.name != end_hub.name
+                    ]) > 0 and turn < 10):
+            turn += 1
+            print(f"[cyan]Turn:[/cyan] [default]{turn}[/default]")
             for drone in drones_list:
-                next_hub: Hub = (
-                    graph[drone.current_hub_name][0].connection_end_hub)
-                if self.can_move(next_hub):
-                    drone.current_hub_name = next_hub.name
-                    next_hub.nbr_hub_drones += 1
-                else:
-                    continue
-        print(
-            f"[cyan]Drone {drone.id}:[/cyan] "
-            f"[default]{drone.current_hub_name}[/default]")
+                print(f"{drone.id}: {drone.current_hub.name} ->", end=" ")
+                for connection in graph[drone.current_hub.name]:
+                    if (
+                        connection.connection_start_hub.name
+                            == drone.current_hub.name):
+                        next_connection: Connection = connection
+                        drone.current_hub = next_connection.connection_end_hub
+                        break
+                print(f"{drone.current_hub.name}")
 
     def can_move(self, next_hub: Hub) -> bool:
         if next_hub.meta_data.hub_access_type != HubAccessType.blocked:
-            if (next_hub.nbr_hub_drones < next_hub.meta_data.max_drones):
+            if next_hub.nbr_hub_drones < next_hub.meta_data.max_drones:
                 return True
         return False

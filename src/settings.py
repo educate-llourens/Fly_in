@@ -63,9 +63,9 @@ class FlyInSettings(BaseModel):
         return self
 
     def create_drones(self) -> None:
-        for i in range(self.nbr_drones - 1):
+        for i in range(self.nbr_drones):
             self.drones_list.append(
-                Drone(id=i + 1, current_hub_name=self.start_hub.name))
+                Drone(id=i + 1, current_hub=self.start_hub))
 
 
 class HubAccessType(Enum):
@@ -135,4 +135,4 @@ class Connection(BaseModel):
 
 class Drone(BaseModel):
     id: int = Field(default=maxsize, ge=0)
-    current_hub_name: str = Field(default="")
+    current_hub: Hub = Field(default_factory=Hub)
