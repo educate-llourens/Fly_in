@@ -46,11 +46,9 @@ class SimulationEngine:
                             == drone.current_hub.name):
                         next_connection: Connection = connection
                         drone.current_hub = next_connection.connection_end_hub
+                        drone.current_hub.nbr_hub_drones += 1
                         break
-                print(f"{drone.current_hub.name}")
-
-    def can_move(self, next_hub: Hub) -> bool:
-        if next_hub.meta_data.hub_access_type != HubAccessType.blocked:
-            if next_hub.nbr_hub_drones < next_hub.meta_data.max_drones:
-                return True
-        return False
+                print(f"{drone.current_hub.name} "
+                      "[cyan]| Number of drones at destination hub: [/cyan]"
+                      f"[default]{drone.current_hub.nbr_hub_drones}/"
+                      f"{drone.current_hub.meta_data.max_drones}[/default]")

@@ -31,8 +31,6 @@ def log_heading(heading: str) -> None:
 
 def log_start_information(settings: FlyInSettings) -> None:
     log_heading("Settings details")
-    print("[cyan]Number of drones: [/cyan]"
-          f"[default]{settings.nbr_drones}[/default]")
     print("")
     for hub in settings.hubs_list:
         print("[cyan]Hub: [/cyan] [default]"
@@ -58,4 +56,16 @@ def log_start_information(settings: FlyInSettings) -> None:
                   f"[default]{connection.max_link_capacity}[/default]")
         else:
             print("")
+    print("")
+    settings.create_drones()
+    log_drone_creation(settings)
+    print("[cyan]Number of drones: [/cyan]"
+          f"[default]{settings.nbr_drones}[/default]")
+    print("")
+
+
+def log_drone_creation(settings: FlyInSettings) -> None:
+    for drone in settings.drones_list:
+        print("[cyan]Created drone with id: [/cyan]"
+              f"[default]{drone.id}[/default]")
     print("")

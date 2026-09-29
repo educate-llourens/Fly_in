@@ -131,6 +131,7 @@ class Connection(BaseModel):
     connection_start_hub: Hub = Field(default_factory=lambda: Hub())
     connection_end_hub: Hub = Field(default_factory=lambda: Hub())
     max_link_capacity: int | None = Field(default=None, ge=0)
+    nbr_drones_on_connection: int = Field(default=0)
 
 
 class Drone(BaseModel):
