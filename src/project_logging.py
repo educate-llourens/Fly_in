@@ -57,11 +57,6 @@ def log_start_information(settings: FlyInSettings) -> None:
         else:
             print("")
     print("")
-    settings.create_drones()
-    log_drone_creation(settings)
-    print("[cyan]Number of drones: [/cyan]"
-          f"[default]{settings.nbr_drones}[/default]")
-    print("")
 
 
 def log_drone_creation(settings: FlyInSettings) -> None:
@@ -69,3 +64,24 @@ def log_drone_creation(settings: FlyInSettings) -> None:
         print("[cyan]Created drone with id: [/cyan]"
               f"[default]{drone.id}[/default]")
     print("")
+    log_key_value("Number of drones created", str(settings.nbr_drones))
+    print("")
+
+
+def log_information(msg: str) -> None:
+    print(f"[cyan]{msg}[/cyan]\n")
+
+
+def log_key_value(key: str, value: str) -> None:
+    print(f"[cyan]{key}: [/cyan][default]{value}[/default]")
+
+
+def log_move_info(drone_id: int, start_hub: str, end_hub: str,
+                  nbr_drones_at_destination: int,
+                  max_drones_at_destination: int) -> None:
+    print(f"[cyan]{drone_id}[/cyan]:"
+          f"[default]{start_hub} -> {end_hub} [/default]"
+          "[cyan]| Hub drones: [/cyan]"
+          f"[default]{nbr_drones_at_destination}/"
+          f"{max_drones_at_destination}[/default]"
+          f"[cyan] | Connection drones: [/cyan]")

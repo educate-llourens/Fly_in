@@ -1,5 +1,6 @@
-from src.settings import FlyInSettings, Connection, Hub, HubAccessType
-from src.project_logging import basic_error_logging
+from src.settings import FlyInSettings, Connection
+from src.project_logging import (basic_error_logging, log_key_value,
+                                 log_move_info)
 from rich import print
 
 
@@ -37,9 +38,9 @@ class SimulationEngine:
                     if drone.current_hub.name != end_hub.name
                     ]) > 0 and turn < 10):
             turn += 1
-            print(f"[cyan]Turn:[/cyan] [default]{turn}[/default]")
+            log_key_value("Turn", str(turn))
             for drone in drones_list:
-                print(f"{drone.id}: {drone.current_hub.name} ->", end=" ")
+                start_hub: str = drone.current_hub.name
                 for connection in graph[drone.current_hub.name]:
                     if (
                         connection.connection_start_hub.name
@@ -47,8 +48,7 @@ class SimulationEngine:
                         next_connection: Connection = connection
                         drone.current_hub = next_connection.connection_end_hub
                         drone.current_hub.nbr_hub_drones += 1
-                        break
-                print(f"{drone.current_hub.name} "
-                      "[cyan]| Number of drones at destination hub: [/cyan]"
-                      f"[default]{drone.current_hub.nbr_hub_drones}/"
-                      f"{drone.current_hub.meta_data.max_drones}[/default]")
+                log_move_info(drone.id, start_hub, drone.current_hub.name,
+                              drone.current_hub.nbr_hub_drones,
+                              drone.current_hub.meta_data.max_drones)
+            print("")
