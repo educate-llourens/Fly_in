@@ -98,8 +98,8 @@ class Hub(BaseModel):
             return self
 
     name: str = Field(default="")
-    x: int = Field(default=(maxsize), ge=0)
-    y: int = Field(default=maxsize, ge=0)
+    x: int = Field(default=(maxsize))
+    y: int = Field(default=maxsize)
     meta_data: MetaData = Field(default_factory=lambda: Hub.MetaData())
     turn_cost: int = Field(default=1)
     priority: int = Field(default=2)

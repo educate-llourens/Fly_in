@@ -4,7 +4,7 @@ BIN_DIR= $(VENV_DIR)/bin
 PYTHON= $(BIN_DIR)/python3
 PIP= $(BIN_DIR)/pip
 ACTIVATE=$(BIN_DIR)activate
-MAP ?= maps/01_linear_path.txt
+MAP ?= maps/easy/01_linear_path.txt
 MYPY_FLAGS= --warn-return-any \
 			--warn-unused-ignore \
 			--ignore-missing-imports \
