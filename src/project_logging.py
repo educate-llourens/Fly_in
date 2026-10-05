@@ -104,9 +104,12 @@ def log_move_info(
     if drone_id in drone_ids:
         print(
             "[yellow][On connection] "
-            f"[Turn={[
-                drone.on_connection_turn for drone in que if drone.id ==
-                drone_id][0]}][/yellow]"
+            f"[Turn={
+                [
+                    drone.on_connection_turn
+                    for drone in que
+                    if drone.id == drone_id
+                ][0]}][/yellow]"
         )
     elif start_hub == end_hub and drone_id not in drone_ids:
         print(f"[yellow][Waiting at {start_hub}][/yellow]")

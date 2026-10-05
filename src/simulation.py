@@ -57,10 +57,7 @@ class SimulationEngine:
                     drone
                     for drone in drones_list
                     if drone.current_hub.name != end_hub.name
-                ]
-            )
-            > 0
-            and turn < 10
+                ]) > 0 and turn < 10
         ):
             turn += 1
             log_key_value("Turn", str(turn))
