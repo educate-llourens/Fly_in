@@ -35,7 +35,8 @@ def log_start_information(settings: FlyInSettings) -> None:
     print("")
     for hub in settings.hubs_list:
         print(
-            "[cyan]Hub: [/cyan] [default]" f"{hub.name} {hub.x} {hub.y}[/default]",
+            "[cyan]Hub: [/cyan] [default]"
+            f"{hub.name} {hub.x} {hub.y}[/default]",
             end=" ",
         )
         if hub.meta_data:
@@ -51,8 +52,10 @@ def log_start_information(settings: FlyInSettings) -> None:
     print("")
     for connection in settings.connections_list:
         print("[cyan]Connection: [/cyan]", end="")
-        print(f"[default]{connection.connection_start_hub.name}[/default]", end=" ")
-        print(f"[default]{connection.connection_end_hub.name}[/default]", end=" ")
+        print(f"[default]{connection.connection_start_hub.name}[/default]",
+              end=" ")
+        print(f"[default]{connection.connection_end_hub.name}[/default]",
+              end=" ")
         if connection.max_link_capacity:
             print(
                 "[cyan]| Max link capacity: [/cyan]"
@@ -65,7 +68,8 @@ def log_start_information(settings: FlyInSettings) -> None:
 
 def log_drone_creation(settings: FlyInSettings) -> None:
     for drone in settings.drones_list:
-        print("[cyan]Created drone with id: [/cyan]" f"[default]{drone.id}[/default]")
+        print("[cyan]Created drone with id: [/cyan]"
+              f"[default]{drone.id}[/default]")
     print("")
     log_key_value("Number of drones created", str(settings.nbr_drones))
     print("")

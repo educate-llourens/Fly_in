@@ -1,6 +1,6 @@
-from src.project_logging import (
-    basic_error_logging, log_title, log_start_information, log_heading,
-    log_drone_creation, log_drone_creation, log_information)
+from src.project_logging import (basic_error_logging, log_title,
+                                 log_start_information, log_heading,
+                                 log_drone_creation)
 from pydantic import ValidationError
 from argparse import ArgumentParser, Namespace
 from sys import exit, argv
