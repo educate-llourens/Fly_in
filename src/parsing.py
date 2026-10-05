@@ -2,6 +2,7 @@ from src.settings import (
     FlyInSettings, Hub, Connection, HubAccessType)
 from src.error_handling import ParsingError
 from rich.errors import StyleSyntaxError
+from sys import maxsize
 
 # Functions in ----------------------------------------------------------------
 # 1. parsing
@@ -43,6 +44,7 @@ class Parser:
                     if self.settings.start_hub.name:
                         raise ParsingError(f"{line} | Duplicate start hub")
                     self.settings.start_hub = self.extract_hub_info(line)
+                    self.settings.start_hub.meta_data.max_drones = maxsize
                     self.settings.hubs_list.insert(0, self.settings.start_hub)
                 elif line.startswith("hub"):
                     self.settings.hubs_list.append(self.extract_hub_info(line))
@@ -50,6 +52,7 @@ class Parser:
                     if self.settings.end_hub.name:
                         raise ParsingError(f"{line} | Duplicate end hub")
                     self.settings.end_hub = self.extract_hub_info(line)
+                    self.settings.end_hub.meta_data.max_drones = maxsize
                     self.settings.hubs_list.insert(
                         len(self.settings.hubs_list), self.settings.end_hub)
                 elif (line.startswith("connection")):
@@ -74,7 +77,7 @@ class Parser:
         get_info_str: str
         info_list: list[str]
         meta_data_list: list[str]
-        meta_data: Hub.MetaData | None = None
+        meta_data: Hub.MetaData
 
         get_info_str = line.split(": ")[1]
         info_list = get_info_str.split(" ", 3)
@@ -84,11 +87,10 @@ class Parser:
             y = int(info_list[2])
         except ValueError:
             raise ParsingError(f"Invalid coordinates for {name}")
+        meta_data = Hub.MetaData()
         if info_list[3]:
             meta_data_list = info_list[3].split(" ")
             for data in meta_data_list:
-                if meta_data is None:
-                    meta_data = Hub.MetaData()
                 if "color" in data:
                     try:
                         meta_data.colour = (
