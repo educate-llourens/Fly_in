@@ -42,7 +42,7 @@ def fly_in() -> None:
     log_drone_creation(settings)
     log_heading("starting the simulation...")
     simulation: SimulationEngine = SimulationEngine(settings)
-    simulation.move_drones()
+    simulation.run()
     return
 
 

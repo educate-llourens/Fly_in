@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sys import maxsize
 from collections import Counter
 from rich.style import Style
+from rich.errors import StyleSyntaxError
 from enum import Enum
 from src.error_handling import ParsingError
 
@@ -94,16 +95,26 @@ class Hub(BaseModel):
         def set_print_style(self):
             if self.colour == "orange":
                 self.print_style = Style.parse("orange1")
+            elif self.colour == "brown":
+                self.print_style = Style.parse("tan")
+            elif self.colour == "lime":
+                self.print_style = Style.parse("green")
+            elif self.colour == "gold":
+                self.print_style == Style.parse("gold1")
             else:
-                self.print_style = Style.parse(self.colour)
+                try:
+                    self.print_style = Style.parse(self.colour)
+                except StyleSyntaxError:
+                    print(f"Invalid colour for {self.colour}. "
+                          "Please try another colour")
+                    self.print_style = Style.parse("default")
             return self
 
     name: str = Field(default="")
     x: int = Field(default=(maxsize))
     y: int = Field(default=maxsize)
     meta_data: MetaData = Field(default_factory=lambda: Hub.MetaData())
-    turn_cost: int = Field(default=1)
-    priority: int = Field(default=2)
+    hub_cost: int = Field(default=maxsize)
     nbr_hub_drones: int = Field(default=0)
 
     @model_validator(mode="after")
@@ -115,15 +126,14 @@ class Hub(BaseModel):
         return self
 
     def hub_rules(self) -> None:
-        hub_access_rules: dict[HubAccessType, tuple[int, int]] = {
-            HubAccessType.normal: (1, 2),
-            HubAccessType.priority: (1, 3),
-            HubAccessType.restricted: (2, 1),
-            HubAccessType.blocked: (maxsize, 0)
+        hub_access_rules: dict[HubAccessType, int] = {
+            HubAccessType.normal: 100,
+            HubAccessType.priority: 200,
+            HubAccessType.restricted: 400,
+            HubAccessType.blocked: (maxsize)
         }
         if self.meta_data:
-            self.turn_cost, self.priority = (
-                hub_access_rules[self.meta_data.hub_access_type])
+            self.hub_cost = hub_access_rules[self.meta_data.hub_access_type]
 
 
 class Connection(BaseModel):
@@ -139,3 +149,4 @@ class Drone(BaseModel):
     id: int = Field(default=maxsize, ge=0)
     current_hub: Hub = Field(default_factory=Hub)
     on_connection_turn: int = Field(default=0)
+    path: list[str] = Field(default=[])

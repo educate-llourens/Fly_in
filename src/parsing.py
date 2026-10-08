@@ -1,7 +1,6 @@
 from src.settings import (
     FlyInSettings, Hub, Connection, HubAccessType)
 from src.error_handling import ParsingError
-from rich.errors import StyleSyntaxError
 from sys import maxsize
 
 # Functions in ----------------------------------------------------------------
@@ -92,11 +91,8 @@ class Parser:
             meta_data_list = info_list[3].split(" ")
             for data in meta_data_list:
                 if "color" in data:
-                    try:
-                        meta_data.colour = (
-                            data.split("color=")[1].replace("]", ""))
-                    except StyleSyntaxError:
-                        raise ParsingError(f"Invalid colour for {name}")
+                    meta_data.colour = (
+                        data.split("color=")[1].replace("]", ""))
                 if "zone" in data:
                     zone_str: str = (
                         data.split("zone=")[1].replace("]", ""))
