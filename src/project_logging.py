@@ -19,6 +19,8 @@ def basic_error_logging(msg: str) -> None:
 
 
 def log_title() -> None:
+    """Logs the program title with correct formatting
+    """
     print(
         "[black on blue]"
         "------------------------[ Fly-in ]-------------------------"
@@ -27,10 +29,22 @@ def log_title() -> None:
 
 
 def log_heading(heading: str) -> None:
+    """Logs a heading with the correct formatting
+
+    Args:
+        heading (str): The message to display
+    """
     print(f"[black on cyan] {heading} [/black on cyan]\n")
 
 
 def log_start_information(settings: FlyInSettings) -> None:
+    """Logs the start information once the file has been
+    processed.
+
+    Args:
+        settings (FlyInSettings): The settings class to retrieve
+        the information we want to display.
+    """
     log_heading("Settings details")
     print("")
     for hub in settings.hubs_list:
@@ -67,6 +81,12 @@ def log_start_information(settings: FlyInSettings) -> None:
 
 
 def log_drone_creation(settings: FlyInSettings) -> None:
+    """Logs the drones created
+
+    Args:
+        settings (FlyInSettings): Class we are retrieving the
+        information from.
+    """
     for drone in settings.drones_list:
         print("[cyan]Created drone with id: [/cyan]"
               f"[default]{drone.id}[/default]")
@@ -76,10 +96,21 @@ def log_drone_creation(settings: FlyInSettings) -> None:
 
 
 def log_information(msg: str) -> None:
+    """Logs information with the correct formatting
+
+    Args:
+        msg (str): Message to display
+    """
     print(f"[cyan]{msg}[/cyan]\n")
 
 
 def log_key_value(key: str, value: str) -> None:
+    """Logs key value pairs with correct formatting
+
+    Args:
+        key (str): Key to display
+        value (str): Value to display
+    """
     print(f"[cyan]{key}: [/cyan][default]{value}[/default]")
 
 
@@ -92,6 +123,20 @@ def log_move_info(
     connection_max_drones: int,
     que: list[Drone],
 ) -> None:
+    """Logs the movement of the drones across the map
+
+    Args:
+        drone_id (int): id of the moving drone
+        start_hub (str): Hub where it started
+        end_hub (str): Hub where it ended
+        nbr_drones_at_destination (int): Number of drones already at the
+        destination hub
+        max_drones_at_destination (int): The maximum number of drones allowed
+        at the destination hub
+        connection_max_drones (int): Maximum number of drones allowed on
+        the connection
+        que (list[Drone]): Que of drones waiting on the connection
+    """
     len_connection_que: int = len(que)
     print(
         f"[cyan]{drone_id}[/cyan]:"

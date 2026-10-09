@@ -10,6 +10,11 @@ class SimulationEngine:
     nbr_turns: int = 0
 
     def __init__(self, settings: FlyInSettings) -> None:
+        """Initiates the simulation
+
+        Args:
+            settings (FlyInSettings): settings for the simulation
+        """
         self.settings: FlyInSettings = settings
         self.graph: dict[str, list[Connection]] = self.create_graph()
         self.drones_list: list[Drone] = settings.drones_list
@@ -19,6 +24,12 @@ class SimulationEngine:
             hub.hub_rules()
 
     def create_graph(self) -> dict[str, list[Connection]]:
+        """Creates an adjacency map
+
+        Returns:
+            dict[str, list[Connection]]: A dictionary of the nodes and their
+            connections
+        """
         graph_dict: dict[str, list[Connection]] = {}
         for connection in self.settings.connections_list:
             start_name = connection.connection_start_hub.name
@@ -32,6 +43,8 @@ class SimulationEngine:
         return graph_dict
 
     def run(self) -> None:
+        """Runs the simulation from start to end
+        """
         end_hub = self.settings.end_hub
         turn = 0
 
@@ -49,6 +62,9 @@ class SimulationEngine:
             self.move_drones()
 
     def assign_drone_path(self) -> None:
+        """Assigns each drone their path and increases the cost of the path
+        everytime a drone chooses that path
+        """
         drones_list = self.settings.drones_list
         for drone in drones_list:
             drone.path = self.pathfinder.dijkstra(
@@ -60,7 +76,11 @@ class SimulationEngine:
                     hub.hub_cost += 5
 
     def move_drones(self) -> None:
+        """Moves the drones each turn
+        """
         def handle_restricted() -> None:
+            """Handles the resttricted hub during movement
+            """
             if (drone not in connection.que and
                     len(connection.que) < connection.max_link_capacity):
                 connection.que.append(drone)
@@ -75,59 +95,66 @@ class SimulationEngine:
                                         "connection starting at "
                                         f"{drone.current_hub.name}")
 
+        def find_connection(start_name: str,
+                            end_name: str) -> Connection | None:
+            """Finds the connection to move on
+
+            Args:
+                start_name (str): Start the movement from this hub
+                end_name (str): End the movement on this hub
+
+            Returns:
+                Connection | None: The connection tomove on or none
+            """
+            for connection in self.graph[start_name]:
+                names: set[str] = {connection.connection_start_hub.name,
+                                   connection.connection_end_hub.name}
+                if names == {start_name, end_name}:
+                    return connection
+            return None
+
         drones_list = self.settings.drones_list
         end_name: str = self.settings.end_hub.name
         connection_capacity: int = 0
-        log_que: list[Drone] = []
 
         for drone in drones_list:
-            start_hub_name: str = drone.current_hub.name
-            if start_hub_name == end_name:
-                middle = drone.path[1:-1]
-                for hub in self.settings.hubs_list:
-                    if hub.name in middle:
-                        hub.hub_cost -= 5
+            current_name: str = drone.current_hub.name
+            if current_name == end_name:
                 continue
-            next_name: str = drone.path[drone.path.index(start_hub_name) + 1]
-            found: Connection | None = self.find_connection(
-                start_hub_name, next_name)
-            if not found:
+            # Find next hub and connection ------------------------------------
+            next_name: str = drone.path[drone.path.index(current_name) + 1]
+            found_connection: Connection | None = find_connection(
+                current_name, next_name)
+            if found_connection is None:
                 continue
-            connection: Connection = found
+            connection = found_connection
             connection_capacity = connection.max_link_capacity
             next_end_hub: Hub = (
                 connection.connection_end_hub
                 if connection.connection_end_hub.name == next_name
                 else connection.connection_start_hub
             )
+            # Handle rules ----------------------------------------------------
             if next_end_hub.nbr_hub_drones < next_end_hub.meta_data.max_drones:
                 if drone.current_hub.nbr_hub_drones > 0:
                     drone.current_hub.nbr_hub_drones -= 1
                 if next_end_hub.meta_data.hub_access_type == (
                         HubAccessType.restricted):
                     handle_restricted()
+            # Move drone ------------------------------------------------------
                 else:
                     drone.current_hub = next_end_hub
                     if drone in connection.que:
                         connection.que.remove(drone)
                 drone.current_hub.nbr_hub_drones += 1
-            log_que = connection.que
+            # Log the movement for the drone ----------------------------------
             log_move_info(
                 drone.id,
-                start_hub_name,
+                current_name,
                 drone.current_hub.name,
                 drone.current_hub.nbr_hub_drones,
                 drone.current_hub.meta_data.max_drones,
                 connection_capacity,
-                log_que
+                connection.que
             )
         print("")
-
-    def find_connection(self, from_name: str,
-                        to_name: str) -> Connection | None:
-        for connection in self.graph[from_name]:
-            names = {connection.connection_start_hub.name,
-                     connection.connection_end_hub.name}
-            if names == {from_name, to_name}:
-                return connection
-        return None

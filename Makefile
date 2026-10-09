@@ -38,7 +38,7 @@ bonfire:
 
 lint:
 	uv run flake8 --exclude=.venv,testing
-	uv run mypy --exclude '.venv/|testing . $(MYPY_FLAGS)
+	uv run mypy --exclude '.venv/|testing' . $(MYPY_FLAGS)
 
 lint-strict:
 	uv run flake8 --exclude=.venv,testing

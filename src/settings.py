@@ -28,6 +28,16 @@ class FlyInSettings(BaseModel):
 
     @model_validator(mode="after")
     def settings_validation(self) -> "FlyInSettings":
+        """validates the setting afterwards
+
+        Raises:
+            ParsingError: Duplicate names
+            ParsingError: Duplicate connections
+            ParsingError: Error with assigning id's
+
+        Returns:
+            FlyInSettings: Class containing information to run the program
+        """
         # Duplicate names -------------------------------------------
         names_list: list[str] = [hub.name for hub in self.hubs_list]
         counter: Counter = Counter(names_list)
@@ -64,6 +74,8 @@ class FlyInSettings(BaseModel):
         return self
 
     def create_drones(self) -> None:
+        """Creates the drones
+        """
         for i in range(self.nbr_drones):
             self.drones_list.append(
                 Drone(id=i + 1, current_hub=self.start_hub))
@@ -71,6 +83,11 @@ class FlyInSettings(BaseModel):
 
 
 class HubAccessType(Enum):
+    """Access types for the hub
+
+    Args:
+        Enum (_type_): Is enum?
+    """
     normal = "normal"
     blocked = "blocked"
     restricted = "restricted"
@@ -92,7 +109,12 @@ class Hub(BaseModel):
         max_drones: int = Field(default=1, ge=0)
 
         @model_validator(mode="after")
-        def set_print_style(self):
+        def set_print_style(self) -> "Hub.MetaData":
+            """Sets the colour for the hub
+
+            Returns:
+                self: returns itself
+            """
             if self.colour == "orange":
                 self.print_style = Style.parse("orange1")
             elif self.colour == "brown":
@@ -100,7 +122,7 @@ class Hub(BaseModel):
             elif self.colour == "lime":
                 self.print_style = Style.parse("green")
             elif self.colour == "gold":
-                self.print_style == Style.parse("gold1")
+                self.print_style = Style.parse("gold1")
             else:
                 try:
                     self.print_style = Style.parse(self.colour)
@@ -119,6 +141,14 @@ class Hub(BaseModel):
 
     @model_validator(mode="after")
     def hub_validation(self) -> "Hub":
+        """Validates the hub information
+
+        Raises:
+            ParsingError: invalid hub name
+
+        Returns:
+            Hub: A hub with necessary information
+        """
         # Valid Hub name --------------------------------------------
         for chr in self.name:
             if not chr.isprintable() or chr == " " or chr == "-":
@@ -126,6 +156,8 @@ class Hub(BaseModel):
         return self
 
     def hub_rules(self) -> None:
+        """Creates the hub rules and hub cost to move there
+        """
         hub_access_rules: dict[HubAccessType, int] = {
             HubAccessType.normal: 100,
             HubAccessType.priority: 200,
@@ -146,6 +178,8 @@ class Connection(BaseModel):
 
 
 class Drone(BaseModel):
+    """Settings information for the drone
+    """
     id: int = Field(default=maxsize, ge=0)
     current_hub: Hub = Field(default_factory=Hub)
     on_connection_turn: int = Field(default=0)

@@ -42,8 +42,10 @@ def fly_in() -> None:
     log_drone_creation(settings)
     log_heading("starting the simulation...")
     simulation: SimulationEngine = SimulationEngine(settings)
-    simulation.run()
-    return
+    try:
+        simulation.run()
+    except Exception as error:
+        basic_error_logging(str(error))
 
 
 if __name__ == "__main__":
