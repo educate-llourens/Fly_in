@@ -154,6 +154,7 @@ class SimulationEngine:
                 drone.current_hub.nbr_hub_drones,
                 drone.current_hub.meta_data.max_drones,
                 connection_capacity,
-                connection.que
+                connection.que,
+                self.settings
             )
         print("")

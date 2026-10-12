@@ -122,6 +122,7 @@ def log_move_info(
     max_drones_at_destination: int,
     connection_max_drones: int,
     que: list[Drone],
+    settings: FlyInSettings
 ) -> None:
     """Logs the movement of the drones across the map
 
@@ -137,10 +138,17 @@ def log_move_info(
         the connection
         que (list[Drone]): Que of drones waiting on the connection
     """
+    start_colour: str = str([hub.meta_data.print_style
+                            for hub in settings.hubs_list
+                            if start_hub == hub.name][0])
+    end_colour: str = str([hub.meta_data.print_style
+                           for hub in settings.hubs_list
+                           if end_hub == hub.name][0])
     len_connection_que: int = len(que)
     print(
         f"[cyan]{drone_id}[/cyan]:"
-        f"[default]{start_hub} -> {end_hub} [/default]"
+        f"[{start_colour}]{start_hub}[/{start_colour}] -> "
+        f"[{end_colour}]{end_hub}[/{end_colour}]"
         "[cyan]| Hub drones: [/cyan]"
         f"[default]{nbr_drones_at_destination}/"
         f"{max_drones_at_destination}[/default]"

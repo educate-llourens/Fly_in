@@ -116,7 +116,7 @@ class Hub(BaseModel):
                 self: returns itself
             """
             if self.colour == "orange":
-                self.print_style = Style.parse("orange1")
+                self.print_style = Style.parse("#FF7F00")
             elif self.colour == "brown":
                 self.print_style = Style.parse("tan")
             elif self.colour == "lime":
