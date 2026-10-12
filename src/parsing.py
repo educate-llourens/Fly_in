@@ -33,31 +33,36 @@ class Parser:
         Returns:
             FlyInSettings: Instance of the overall settings
         """
-
-        with open(self.file_path, "r") as config_file:
-            for line in config_file:
-                line = line.strip()
-                if line.startswith("nb_drones"):
-                    self.settings.nbr_drones = int(line.split(":", 1)[1])
-                elif line.startswith("start_hub"):
-                    if self.settings.start_hub.name:
-                        raise ParsingError(f"{line} | Duplicate start hub")
-                    self.settings.start_hub = self.extract_hub_info(line)
-                    self.settings.start_hub.meta_data.max_drones = maxsize
-                    self.settings.hubs_list.insert(0, self.settings.start_hub)
-                elif line.startswith("hub"):
-                    self.settings.hubs_list.append(self.extract_hub_info(line))
-                elif line.startswith("end_hub"):
-                    if self.settings.end_hub.name:
-                        raise ParsingError(f"{line} | Duplicate end hub")
-                    self.settings.end_hub = self.extract_hub_info(line)
-                    self.settings.end_hub.meta_data.max_drones = maxsize
-                    self.settings.hubs_list.insert(
-                        len(self.settings.hubs_list), self.settings.end_hub)
-                elif (line.startswith("connection")):
-                    connection: Connection = self.extract_connection(
-                        line, self.settings.hubs_list)
-                    self.settings.connections_list.append(connection)
+        try:
+            with open(self.file_path, "r") as config_file:
+                for line in config_file:
+                    line = line.strip()
+                    if line.startswith("nb_drones"):
+                        self.settings.nbr_drones = int(line.split(":", 1)[1])
+                    elif line.startswith("start_hub"):
+                        if self.settings.start_hub.name:
+                            raise ParsingError(f"{line} | Duplicate start hub")
+                        self.settings.start_hub = self.extract_hub_info(line)
+                        self.settings.start_hub.meta_data.max_drones = maxsize
+                        self.settings.hubs_list.insert(
+                            0, self.settings.start_hub)
+                    elif line.startswith("hub"):
+                        self.settings.hubs_list.append(
+                            self.extract_hub_info(line))
+                    elif line.startswith("end_hub"):
+                        if self.settings.end_hub.name:
+                            raise ParsingError(f"{line} | Duplicate end hub")
+                        self.settings.end_hub = self.extract_hub_info(line)
+                        self.settings.end_hub.meta_data.max_drones = maxsize
+                        self.settings.hubs_list.insert(
+                            len(self.settings.hubs_list),
+                            self.settings.end_hub)
+                    elif (line.startswith("connection")):
+                        connection: Connection = self.extract_connection(
+                            line, self.settings.hubs_list)
+                        self.settings.connections_list.append(connection)
+        except (ValueError, FileNotFoundError, PermissionError) as error:
+            raise ParsingError(str(error))
         return self.settings
 
     def extract_hub_info(self, line: str) -> Hub:

@@ -71,6 +71,11 @@ class FlyInSettings(BaseModel):
             if drone.id == maxsize and len(self.drones_list) + 1 < maxsize:
                 raise ParsingError(f"Drone id {maxsize} should be less than "
                                    f"{self.nbr_drones}")
+        # There is a start and end hub ----------------------------------------
+        if self.start_hub.name == "":
+            raise ParsingError("No start hub identified")
+        elif self.end_hub.name == "":
+            raise ParsingError("No end hub identified")
         return self
 
     def create_drones(self) -> None:
