@@ -4,6 +4,7 @@ from src.project_logging import (basic_error_logging, log_key_value,
 from rich import print
 from src.settings import Hub, HubAccessType
 from src.pathfinding import Pathfinding
+from src.error_handling import SimulationError
 
 
 class SimulationEngine:
@@ -96,7 +97,7 @@ class SimulationEngine:
                                         f"{drone.current_hub.name}")
 
         def find_connection(start_name: str,
-                            end_name: str) -> Connection | None:
+                            end_name: str) -> Connection:
             """Finds the connection to move on
 
             Args:
@@ -111,7 +112,8 @@ class SimulationEngine:
                                    connection.connection_end_hub.name}
                 if names == {start_name, end_name}:
                     return connection
-            return None
+            raise SimulationError(f"Drone {drone.id} could not find "
+                                  "next connection")
 
         drones_list = self.settings.drones_list
         end_name: str = self.settings.end_hub.name
@@ -123,11 +125,8 @@ class SimulationEngine:
                 continue
             # Find next hub and connection ------------------------------------
             next_name: str = drone.path[drone.path.index(current_name) + 1]
-            found_connection: Connection | None = find_connection(
+            connection: Connection = find_connection(
                 current_name, next_name)
-            if found_connection is None:
-                continue
-            connection = found_connection
             connection_capacity = connection.max_link_capacity
             next_end_hub: Hub = (
                 connection.connection_end_hub

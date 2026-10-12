@@ -6,7 +6,7 @@ from argparse import ArgumentParser, Namespace
 from sys import exit, argv
 from pathlib import Path
 from src.settings import FlyInSettings
-from src.error_handling import InputError, ParsingError
+from src.error_handling import InputError, ParsingError, SimulationError
 from src.parsing import Parser
 from src.simulation import SimulationEngine
 
@@ -44,8 +44,9 @@ def fly_in() -> None:
     simulation: SimulationEngine = SimulationEngine(settings)
     try:
         simulation.run()
-    except Exception as error:
+    except (SimulationError, Exception) as error:
         basic_error_logging(str(error))
+        return
 
 
 if __name__ == "__main__":

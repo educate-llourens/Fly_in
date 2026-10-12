@@ -22,9 +22,6 @@ run:
 debug:
 	$(PYTHON) -m pdb $(MAIN) $(MAP)
 
-test:
-	pytest
-
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	rm -rf .mypy_cache

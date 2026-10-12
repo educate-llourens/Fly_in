@@ -164,8 +164,7 @@ class Hub(BaseModel):
             HubAccessType.restricted: 400,
             HubAccessType.blocked: (maxsize)
         }
-        if self.meta_data:
-            self.hub_cost = hub_access_rules[self.meta_data.hub_access_type]
+        self.hub_cost = hub_access_rules[self.meta_data.hub_access_type]
 
 
 class Connection(BaseModel):
