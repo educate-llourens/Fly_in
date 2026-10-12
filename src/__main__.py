@@ -26,7 +26,8 @@ def fly_in() -> None:
     parser: Parser = Parser(path_map)
     try:
         settings: FlyInSettings = parser.parse_file()
-    except (InputError, ParsingError, ValidationError) as error:
+    except (InputError, ParsingError, ValidationError, FileNotFoundError,
+            PermissionError) as error:
         if isinstance(error, ValidationError):
             for msg in error.errors():
                 basic_error_logging(
